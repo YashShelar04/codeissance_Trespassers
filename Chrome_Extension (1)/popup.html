@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXTBOT Time Tracker</title>
+    <style>
+        body {
+            width: 300px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .logo {
+            max-width: 200px;
+            margin-bottom: 20px;
+        }
+
+        #time {
+            font-size: 36px;
+            font-weight: bold;
+            color: #3498db;
+            margin: 20px 0;
+        }
+
+        .label {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+
+        .url {
+            font-size: 14px;
+            color: #34495e;
+            word-break: break-all;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <img src="blacklogo.png" alt="NEXTBOT" class="logo">
+        <div class="label">Time spent on this site:</div>
+        <div id="time">Loading...</div>
+        <div class="url" id="current-url"></div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+
+</html>
