@@ -1,21 +1,37 @@
 // lib/firebase.js
 import { initializeApp, getApps } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+// import { getStorage } from "firebase/storage";
+import { FirebaseOptions } from "firebase/app";
 
-const firebaseConfig = {
-  NEXT_PUBLIC_FIREBASE_API_KEY: "AIzaSyB0GdNN5sTx2MDEJ5x66ptwTfQlOy_A4lI",
-  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "legacylink-555f0.firebaseapp.com",
-  NEXT_PUBLIC_FIREBASE_PROJECT_ID: "legacylink-555f0",
-  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "legacylink-555f0.appspot.com",
-  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "594393961926",
-  NEXT_PUBLIC_FIREBASE_APP_ID: "1:594393961926:web:d21eef04495d63c5cdcec7",
+const firebaseConfig: FirebaseOptions = {
+  apiKey: "AIzaSyB0GdNN5sTx2MDEJ5x66ptwTfQlOy_A4lI",
+  authDomain: "legacylink-555f0.firebaseapp.com",
+  projectId: "legacylink-555f0",
+  storageBucket: "legacylink-555f0.appspot.com",
+  messagingSenderId: "594393961926",
+  appId: "1:594393961926:web:d21eef04495d63c5cdcec7",
 };
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
-
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 const auth = getAuth(app);
-const firestore = getFirestore(app);
-const storage = getStorage(app);
-export { app, auth, firestore, storage };
+const googleProvider = new GoogleAuthProvider();
+
+// Function to sign in with Google
+const signInWithGoogle = async () => {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    // The signed-in user info
+    const user = result.user;
+    // You can access user details here and save it in your Firestore or handle it as needed.
+    console.log(user);
+    return user;
+  } catch (error) {
+    console.error("Error signing in with Google: ", error);
+    throw error; // Handle error in your UI
+  }
+};
+
+export { db, auth, signInWithGoogle };

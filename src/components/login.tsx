@@ -1,21 +1,23 @@
 "use client";
+
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Spline from "@splinetool/react-spline";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mail, Lock, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
-import Link from "next/link"; // Import Link for navigation
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { auth } from "@/lib/firebase"; // Ensure this path is correct
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 export default function LoginPageComponent() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [showForm, setShowForm] = useState<boolean>(false); // Control form visibility
   const router = useRouter();
 
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+  const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
 
@@ -24,117 +26,114 @@ export default function LoginPageComponent() {
     const password = formData.get("password") as string;
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        throw new Error(result.error);
-      }
-
+      const res = await signInWithEmailAndPassword(auth, email, password);
+      console.log({ res });
       toast.success("Logged in successfully");
-      router.push("/dashboard");
+
+      // Optionally, set session storage
+      sessionStorage.setItem("user", "true");
+
+      router.push("/dashboard"); // Or redirect to homepage ("/")
     } catch (error) {
       console.error(error);
       toast.error("Invalid credentials. Please try again.");
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-background">
-      {/* Fullscreen Spline background */}
+    <div className="relative min-h-screen flex items-center justify-center bg-background overflow-hidden">
       <div className="absolute inset-0 z-0">
         <Spline scene="https://prod.spline.design/iFGbWEqvFex1PypX/scene.splinecode" />
       </div>
 
-      {/* Login form in the foreground */}
-      <div className="relative z-10 w-full lg:w-1/3 p-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="relative z-10 w-full max-w-md p-8"
+      >
         <div
-          className="mx-auto w-full max-w-md space-y-6 p-8 backdrop-blur-md bg-white/30 border border-white/30 shadow-lg rounded-xl"
+          className="w-full space-y-6 p-8 backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl rounded-2xl"
           style={{
             background: "rgba(255, 255, 255, 0.1)",
-            border: "1px solid rgba(255, 255, 255, 0.3)",
             backdropFilter: "blur(20px)",
-            borderRadius: "16px",
           }}
         >
           <div className="space-y-2 text-center">
-            <h1 className="text-3xl font-bold text-white">Login</h1>
-            <p className="text-white/80">Choose how you'd like to sign in</p>
+            <h1 className="text-4xl font-bold text-black">Welcome Back</h1>
+            <p className="text-black/80">Sign in to your account</p>
           </div>
 
-          {/* Initial choice between Google sign-in and Email/Password form */}
-          {!showForm ? (
-            <div className="space-y-4">
-              <Button
-                className="w-full"
-                onClick={() => signIn("google")}
-                disabled={isLoading}
-              >
-                Sign In with Google
-              </Button>
-              <Button
-                className="w-full mt-4"
-                variant="secondary"
-                onClick={() => setShowForm(true)}
-                disabled={isLoading}
-              >
-                Sign In with Email
-              </Button>
-            </div>
-          ) : (
-            <form onSubmit={onSubmit}>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-white">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    placeholder="m@example.com"
-                    required
-                    type="email"
-                    className="bg-white/50 text-white/80 border-white/30"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-white">
-                    Password
-                  </Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    required
-                    type="password"
-                    className="bg-white/50 text-white/80 border-white/30"
-                  />
-                </div>
-                <Button className="w-full" type="submit" disabled={isLoading}>
-                  {isLoading && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Sign In
-                </Button>
+          <motion.form
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            onSubmit={handleSignIn}
+            className="space-y-6"
+          >
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-black">
+                Email
+              </Label>
+              <div className="relative">
+                <Input
+                  id="email"
+                  name="email"
+                  placeholder="m@example.com"
+                  required
+                  type="email"
+                  className="pl-10 bg-white/20 border-white/30 text-black placeholder-white/50 rounded-full focus:ring-purple-500 focus:border-purple-500"
+                />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black/50 w-5 h-5" />
               </div>
-            </form>
-          )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-black">
+                Password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  placeholder="Password"
+                  required
+                  type="password"
+                  className="pl-10 bg-white/20 border-white/30 text-black placeholder-white/50 rounded-full focus:ring-purple-500 focus:border-purple-500"
+                />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black/50 w-5 h-5" />
+              </div>
+            </div>
+            <Button
+              className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg hover:from-purple-600 hover:to-purple-700 transition duration-300 rounded-full py-6 text-lg font-semibold flex items-center justify-center space-x-2"
+              type="submit"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className="w-6 h-6 animate-spin" />
+              ) : (
+                <>
+                  <span>Sign In</span>
+                  <ArrowRight className="w-5 h-5" />
+                </>
+              )}
+            </Button>
+          </motion.form>
 
-          {/* Sign Up Link */}
-          <div className="text-center mt-4">
-            <p className="text-white/80">
+          <div className="text-center mt-6">
+            <p className="text-black/80">
               Don't have an account?{" "}
-              <Link href="/signup" className="text-blue-500 hover:underline">
+              <Link
+                href="/signup"
+                className="text-blue-800 hover:underline font-semibold"
+              >
                 Sign Up
               </Link>
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
